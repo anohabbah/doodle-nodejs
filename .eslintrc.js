@@ -6,8 +6,7 @@ module.exports = {
     'node': true,
     'jest': true
   },
-  'extends': ['eslint:recommended', 'google', 'plugin:prettier/recommended', 'prettier'],
-  'plugins': ['prettier'],
+  'extends': ['eslint:recommended', 'google', 'plugin:prettier/recommended'],
   'globals': {
     'Atomics': 'readonly',
     'SharedArrayBuffer': 'readonly',
@@ -18,7 +17,7 @@ module.exports = {
   'rules': {
     'prettier/prettier': [
       'error',
-      {singleQuote: true, semi: true, endOfLine: 'crlf'}
+      {singleQuote: true, semi: true, endOfLine: 'cr'}
     ],
     'new-cap': ['error', {capIsNew: false}],
     'no-console': 'off'
