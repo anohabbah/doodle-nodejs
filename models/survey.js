@@ -1,0 +1,1 @@
+'use strict';module.exports = (sequelize, DataTypes) => {  const Survey = sequelize.define(    'Survey',    {      link: {        type: DataTypes.STRING,        unique: true,        validate: { notEmpty: true, isUrl: true }      }    },    {}  );  Survey.associate = function(models) {    // associations can be defined here  };  return Survey;};
