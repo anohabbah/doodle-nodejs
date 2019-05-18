@@ -1,5 +1,6 @@
 'use strict';
 
+// TODO: For security reasons think to override validation messages
 module.exports = (sequelize, DataTypes) => {
   const Meeting = sequelize.define(
     'Meeting',

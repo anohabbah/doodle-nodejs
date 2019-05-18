@@ -57,6 +57,24 @@ describe('Meetings', () => {
       const meetings = await Meeting.findAll();
       expect(parse(meetings)).toEqual(expect.arrayContaining([res.body]));
     });
+
+    it('should return an UnProcessable Entity Error if title & description are not provided', async () => {
+      attributes = { title: null, description: null };
+      const res = await exec();
+      expect(res.statusCode).toBe(422);
+    });
+
+    it("should return an UnProcessable Entity Error if title isn't provided", async () => {
+      attributes = { title: null, description: faker.lorem.paragraph() };
+      const res = await exec();
+      expect(res.statusCode).toBe(422);
+    });
+
+    it("should return an UnProcessable Entity Error if description isn't provided", async () => {
+      attributes = { title: faker.lorem.sentence(), description: null };
+      const res = await exec();
+      expect(res.statusCode).toBe(422);
+    });
   });
 
   describe(`GET ${apiURL}/:meetingId`, () => {
@@ -72,6 +90,12 @@ describe('Meetings', () => {
       url = `${apiURL}/${meeting.id}`;
       const res = await exec();
       expect(res.body).toEqual(expect.objectContaining(parse(meeting)));
+    });
+
+    it('should return 404 Error if the given Id does not exist', async () => {
+      url = `${apiURL}/3`;
+      const res = await exec();
+      expect(res.statusCode).toBe(404);
     });
   });
 
@@ -100,6 +124,27 @@ describe('Meetings', () => {
 
       expect(res.body).toEqual(expect.objectContaining(data));
     });
+
+    it('should return an UnProcessable Entity Error if title & description are not provided', async () => {
+      url = `${apiURL}/${meeting.id}`;
+      data = { title: null, description: null };
+      const res = await exec();
+      expect(res.statusCode).toBe(422);
+    });
+
+    it("should return an UnProcessable Entity Error if title isn't provided", async () => {
+      url = `${apiURL}/${meeting.id}`;
+      data = { title: null, description: 'Beautiful description' };
+      const res = await exec();
+      expect(res.statusCode).toBe(422);
+    });
+
+    it("should return an UnProcessable Entity Error if description isn't provided", async () => {
+      url = `${apiURL}/${meeting.id}`;
+      data = { title: 'Beautiful title', description: null };
+      const res = await exec();
+      expect(res.statusCode).toBe(422);
+    });
   });
 
   describe(`DELETE ${apiURL}/:projectId`, () => {
@@ -118,6 +163,12 @@ describe('Meetings', () => {
       const meetings = await Meeting.findAll();
       expect(res.body).toEqual(expect.objectContaining(parse(meeting)));
       expect(parse(meetings)).toEqual(expect.not.arrayContaining([res.body]));
+    });
+
+    it('should return 404 Error if the given Id does not exist', async () => {
+      url = `${apiURL}/3`;
+      const res = await exec();
+      expect(res.statusCode).toBe(404);
     });
   });
 });
