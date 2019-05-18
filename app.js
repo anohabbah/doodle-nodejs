@@ -1,5 +1,5 @@
 require('express-async-errors');
-const createError = require('http-errors');
+const { createError } = require('./utils/create-error.util');
 const express = require('express');
 const logger = require('morgan');
 const helmet = require('helmet');
@@ -16,8 +16,8 @@ process.on('unhandledRejection', ex => {
 
 const errorMiddleware = require('./middlewares/error.middleware');
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
+const meetingRouter = require('./routes/meetings.route');
+const usersRouter = require('./routes/users.route');
 
 const app = express();
 
@@ -26,7 +26,7 @@ if (process.env.NODE_ENV !== 'production') app.use(logger('dev'));
 app.use(helmet());
 app.use(express.json());
 
-app.use('/', indexRouter);
+app.use('/api/meetings', meetingRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler

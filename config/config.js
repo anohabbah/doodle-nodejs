@@ -15,12 +15,12 @@ module.exports = {
     password: '',
     database: 'db_doodle',
     host: '127.0.0.1',
-    dialect: 'mysql',
+    dialect: 'mariadb',
     ...commonOptions
   },
   test: {
-    database: ':memory:',
     dialect: 'sqlite',
+    logging: false,
     ...commonOptions
   },
   production: {
