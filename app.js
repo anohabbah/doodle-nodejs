@@ -20,6 +20,7 @@ const errorMiddleware = require('./middlewares/error.middleware');
 const meetingRouter = require('./routes/meetings.route');
 const registrationRouter = require('./routes/registration.route');
 const loginRouter = require('./routes/login.route');
+const {handleCookies} = require("./middlewares/auth.middleware");
 
 const app = express();
 
@@ -28,6 +29,7 @@ if (process.env.NODE_ENV !== 'production') app.use(logger('dev'));
 app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
+app.use(handleCookies);
 
 app.use('/api/meetings', meetingRouter);
 app.use('/api/register', registrationRouter);
