@@ -22,6 +22,7 @@
     "lodash": "^4.17.11",
     "morgan": "~1.9.1",
     "mysql2": "^1.6.5",
+    "password-validator": "~4.1.1",
     "sequelize": "^5.8.6",
     "sqlite3": "^4.0.8",
     "winston": "~3.2.1"

@@ -19,6 +19,7 @@ const errorMiddleware = require('./middlewares/error.middleware');
 
 const meetingRouter = require('./routes/meetings.route');
 const registrationRouter = require('./routes/registration.route');
+const loginRouter = require('./routes/login.route');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(cookieParser());
 
 app.use('/api/meetings', meetingRouter);
 app.use('/api/register', registrationRouter);
+app.use('/api/login', loginRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
