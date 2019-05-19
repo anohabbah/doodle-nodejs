@@ -21,7 +21,7 @@ module.exports = {
     ],
     'new-cap': ['error', {capIsNew: false}],
     'no-console': 'off',
-    'max-len': [2, { code: 160, tabWidth: 2 }],
+    'max-len': [2, { code: 180, tabWidth: 2 }],
     eqeqeq: [2, 'always']
   },
 };
