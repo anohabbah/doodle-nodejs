@@ -1,6 +1,5 @@
 const request = require('supertest');
 const faker = require('faker');
-// const _ = require('lodash');
 const { parse } = require('./../../utils/app.util');
 const { sequelize, Meeting } = require('./../../models');
 const app = require('./../../app');
@@ -27,13 +26,15 @@ describe('Meetings', () => {
   describe(`GET ${apiURL}`, () => {
     const exec = async () => await request(app).get(apiURL);
 
-    it('should respond 200', async () => {
+    it('unauthenticated user could not load meetings', async () => {
       const res = await exec();
-      expect(res.statusCode).toBe(200);
+
+      expect(res.statusCode).toBe(401);
     });
 
     it('should return meeting list available from DB', async () => {
       const res = await exec();
+
       expect(res.body).toEqual(expect.arrayContaining([parse(meeting)]));
     });
   });
