@@ -64,10 +64,14 @@ router['put']('/:meetingId', (req, res, next) => {
 
 router['delete']('/:meetingId', async (req, res) => {
   const id = parseInt(req.params['meetingId'], 10);
+  const authUserId = parseInt(req['user'], 10);
 
   const meeting = await Meeting.findByPk(id);
 
   if (!meeting) throw createNotFoundError('Not Found! Resource not found.');
+
+  if (meeting.ownerId !== authUserId)
+    throw createForbiddenError('Forbidden ! Only meeting owner can delete it.');
 
   await meeting.destroy();
 

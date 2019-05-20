@@ -236,8 +236,25 @@ describe('Meetings', () => {
       expect(res.statusCode).toBe(401);
     });
 
+    it('should delete a meeting only and only if the authenticated user is the owner', async () => {
+      url = `${apiURL}/${meeting.id}`;
+
+      let res = await exec();
+
+      expect(res.statusCode).toBe(403);
+
+      await meeting.setOwner(user);
+
+      res = await exec();
+
+      expect(res.statusCode).toBe(200);
+    });
+
     it('should delete a meeting if the user is authenticated', async () => {
       url = `${apiURL}/${meeting.id}`;
+
+      await meeting.setOwner(user);
+
       const res = await exec();
 
       const meetings = await Meeting.findAll();
@@ -247,7 +264,9 @@ describe('Meetings', () => {
 
     it('should return 404 Error if the given Id does not exist', async () => {
       url = `${apiURL}/3`;
+
       const res = await exec();
+
       expect(res.statusCode).toBe(404);
     });
   });
