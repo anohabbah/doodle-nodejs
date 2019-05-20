@@ -5,13 +5,13 @@ const { sequelize, Meeting, User } = require('./../../models');
 const app = require('./../../app');
 const { createSessionToken } = require('../../utils/security.util');
 
-let meeting;
-
 describe('Meetings', () => {
   let attributes;
   let url;
   const apiURL = '/api/meetings';
   let cookie;
+  let meeting;
+  let user;
 
   beforeEach(async () => {
     await sequelize.sync({ force: true });
@@ -24,7 +24,7 @@ describe('Meetings', () => {
     meeting = await Meeting.create(attributes);
     await meeting.reload();
 
-    const user = await User.create({
+    user = await User.create({
       name: Faker.name.findName(),
       email: Faker.internet.email(),
       password: Faker.internet.password()
@@ -47,9 +47,20 @@ describe('Meetings', () => {
     });
 
     it('should load meetings if user is authenticated', async () => {
+      await meeting.setOwner(user);
+
       const res = await exec();
 
       expect(res.body).toEqual(expect.arrayContaining([parse(meeting)]));
+    });
+
+    it('should load auth user meetings only', async () => {
+      const userMeeting = await Meeting.create(attributes);
+      await userMeeting.setOwner(user);
+
+      const res = await exec();
+      expect(res.body).toEqual(expect.not.arrayContaining([parse(meeting)]));
+      expect(res.body).toEqual(expect.arrayContaining([parse(userMeeting)]));
     });
   });
 
@@ -73,6 +84,7 @@ describe('Meetings', () => {
 
       const meetings = await Meeting.findAll();
       expect(parse(meetings)).toEqual(expect.arrayContaining([res.body]));
+      expect(res.body.ownerId).toBe(user.id);
     });
 
     it('should return an UnProcessable Entity Error if title & description are not provided', async () => {
@@ -143,29 +155,70 @@ describe('Meetings', () => {
         description: Faker.lorem.paragraph()
       };
 
+      await meeting.setOwner(user);
+
       const res = await exec();
 
       expect(res.body).toEqual(expect.objectContaining(data));
     });
 
+    it('should update a meeting, only and only if the authenticated user is the owner', async () => {
+      url = `${apiURL}/${meeting.id}`;
+
+      let res = await exec();
+
+      expect(res.statusCode).toBe(403);
+
+      data = {
+        title: Faker.lorem.sentence(),
+        description: Faker.lorem.paragraph()
+      };
+      await meeting.setOwner(user);
+
+      res = await exec();
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual(expect.objectContaining(data));
+    });
+
+    it('should throw if trying to update a meeting that does not exist', async () => {
+      url = `${apiURL}/3`;
+
+      const res = await exec();
+
+      expect(res.statusCode).toBe(404);
+    });
+
     it('should return an UnProcessable Entity Error if title & description are not provided', async () => {
       url = `${apiURL}/${meeting.id}`;
       data = { title: null, description: null };
+
+      await meeting.setOwner(user);
+
       const res = await exec();
+
       expect(res.statusCode).toBe(422);
     });
 
     it("should return an UnProcessable Entity Error if title isn't provided", async () => {
       url = `${apiURL}/${meeting.id}`;
       data = { title: null, description: 'Beautiful description' };
+
+      await meeting.setOwner(user);
+
       const res = await exec();
+
       expect(res.statusCode).toBe(422);
     });
 
     it("should return an UnProcessable Entity Error if description isn't provided", async () => {
       url = `${apiURL}/${meeting.id}`;
       data = { title: 'Beautiful title', description: null };
+
+      await meeting.setOwner(user);
+
       const res = await exec();
+
       expect(res.statusCode).toBe(422);
     });
   });

@@ -10,7 +10,8 @@ const { createUnauthorizedError } = require('../utils/create-error.util');
  */
 async function handleSessionCookie(cookie, req) {
   try {
-    req['user'] = await decodeJWT(cookie);
+    const payload = await decodeJWT(cookie);
+    req['user'] = payload.sub;
   } catch (e) {
     throw createError(500, e);
   }

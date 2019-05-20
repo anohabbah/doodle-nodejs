@@ -1,13 +1,15 @@
 const router = require('express').Router();
 const { Meeting } = require('./../models');
 const _ = require('lodash');
+const { createForbiddenError } = require('../utils/create-error.util');
 const { authMiddleware } = require('../middlewares/auth.middleware');
 const { createNotFoundError } = require('../utils/create-error.util');
 
 router['use'](authMiddleware);
 
 router['get']('/', async (req, res) => {
-  const meetings = await Meeting.findAll();
+  const authUserId = parseInt(req['user'], 10);
+  const meetings = await Meeting.findAll({ where: { ownerId: authUserId } });
   res.status(200).json(meetings);
 });
 
@@ -16,7 +18,7 @@ router['post']('/', (req, res) => {
 
   Meeting.create(body)
     .then(async meeting => {
-      await meeting.reload();
+      await meeting.setOwner(parseInt(req['user'], 10));
       res.status(201).json(meeting);
     })
     .catch(err => {
@@ -26,21 +28,30 @@ router['post']('/', (req, res) => {
     });
 });
 
-router['get']('/:projectId', async (req, res) => {
-  const id = parseInt(req.params['projectId'], 10);
+router['get']('/:meetingId', async (req, res) => {
+  const id = parseInt(req.params['meetingId'], 10);
 
   const meeting = await Meeting.findByPk(id);
-  if (!meeting) throw createNotFoundError();
+  if (!meeting) throw createNotFoundError('Not Found! Resource not found.');
 
   res.status(200).json(meeting);
 });
 
-router['put']('/:projectId', (req, res) => {
-  const id = parseInt(req.params['projectId'], 10);
+router['put']('/:meetingId', (req, res, next) => {
+  const id = parseInt(req.params['meetingId'], 10);
+  const authUserId = parseInt(req['user'], 10);
   const values = req.body;
 
   Meeting.findByPk(id)
     .then(async meeting => {
+      if (!meeting)
+        return next(createNotFoundError('Not Found! Resource not found.'));
+
+      if (meeting.ownerId !== authUserId)
+        return next(
+          createForbiddenError('Forbidden ! Only meeting owner can update it.')
+        );
+
       meeting = await meeting.update(values);
       res.status(200).json(meeting);
     })
@@ -51,11 +62,13 @@ router['put']('/:projectId', (req, res) => {
     );
 });
 
-router['delete']('/:projectId', async (req, res) => {
-  const id = parseInt(req.params['projectId'], 10);
+router['delete']('/:meetingId', async (req, res) => {
+  const id = parseInt(req.params['meetingId'], 10);
 
   const meeting = await Meeting.findByPk(id);
-  if (!meeting) throw createNotFoundError();
+
+  if (!meeting) throw createNotFoundError('Not Found! Resource not found.');
+
   await meeting.destroy();
 
   res.status(200).json(meeting);
