@@ -18,7 +18,7 @@ router['post']('/', (req, res) => {
 
   Meeting.create(body)
     .then(async meeting => {
-      await meeting.setOwner(parseInt(req['user'], 10));
+      await meeting['setOwner'](parseInt(req['user'], 10));
       res.status(201).json(meeting);
     })
     .catch(err => {

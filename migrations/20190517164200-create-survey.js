@@ -13,7 +13,6 @@ module.exports = {
         references: { model: 'meetings', key: 'id' }
       },
       link: {
-        allowNull: false,
         unique: true,
         type: Sequelize.STRING
       },

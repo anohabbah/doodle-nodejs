@@ -15,7 +15,7 @@ module.exports = {
     password: '',
     database: 'db_doodle',
     host: '127.0.0.1',
-    dialect: 'mariadb',
+    dialect: 'mysql',
     ...commonOptions
   },
   test: {
