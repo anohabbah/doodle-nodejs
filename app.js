@@ -20,7 +20,7 @@ const errorMiddleware = require('./middlewares/error.middleware');
 const meetingRouter = require('./routes/meetings.route');
 const registrationRouter = require('./routes/registration.route');
 const loginRouter = require('./routes/login.route');
-const {handleCookies} = require("./middlewares/auth.middleware");
+const { handleCookies } = require('./middlewares/auth.middleware');
 
 const app = express();
 

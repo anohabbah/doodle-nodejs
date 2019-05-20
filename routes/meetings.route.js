@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { authMiddleware } = require('../middlewares/auth.middleware');
 const { createNotFoundError } = require('../utils/create-error.util');
 
-router.use(authMiddleware);
+router['use'](authMiddleware);
 
 router['get']('/', async (req, res) => {
   const meetings = await Meeting.findAll();
