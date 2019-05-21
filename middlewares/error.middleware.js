@@ -8,6 +8,6 @@ const configTransports =
 const logger = createLogger({ transports: configTransports });
 
 module.exports = (err, req, res, next) => {
-  logger.error(err.message, [err]);
+  logger.error(err.message, err);
   res.sendStatus(err.statusCode);
 };

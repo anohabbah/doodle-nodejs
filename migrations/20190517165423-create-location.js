@@ -14,7 +14,10 @@ module.exports = {
         references: { model: 'surveys', key: 'id' }
       },
       address: {
-        type: Sequelize.STRING
+        type: {
+          allowNull: false,
+          type: Sequelize.STRING
+        }
       },
       created_at: {
         allowNull: false,

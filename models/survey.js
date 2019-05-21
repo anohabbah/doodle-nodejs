@@ -11,7 +11,14 @@ module.exports = (sequelize, DataTypes) => {
         validate: { notEmpty: true, isUrl: true }
       }
     },
-    {}
+    {
+      hooks: {
+        async afterCreate(instance, options) {
+          const link = 'http://127.0.0.1:3000/api/surveys/1';
+          await instance.update({ link });
+        }
+      }
+    }
   );
 
   Survey.associate = function({ Meeting, User, Location }) {

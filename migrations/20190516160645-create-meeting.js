@@ -13,9 +13,11 @@ module.exports = {
         references: { model: 'users', key: 'id' }
       },
       title: {
+        allowNull: false,
         type: Sequelize.STRING
       },
       description: {
+        allowNull: false,
         type: Sequelize.TEXT
       },
       pause: {

@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { Meeting } = require('./../models');
+const { Meeting, Survey, Location, sequelize } = require('./../models');
 const _ = require('lodash');
 const { createForbiddenError } = require('../utils/create-error.util');
 const { authMiddleware } = require('../middlewares/auth.middleware');
@@ -76,6 +76,34 @@ router['delete']('/:meetingId', async (req, res) => {
   await meeting.destroy();
 
   res.status(200).json(meeting);
+});
+
+// SURVEYS
+
+router['post']('/:meetingId/surveys', async (req, res) => {
+  const survey = await sequelize.transaction(async transaction => {
+    const { locations } = req.body;
+    const { meetingId } = req.params;
+
+    const meeting = await Meeting.findByPk(meetingId);
+
+    const survey = await Survey.create({}, { transaction });
+
+    const mLocations = [];
+    for (const address of locations) {
+      const location = await Location.create({ address }, { transaction });
+      mLocations.push(location);
+    }
+    await survey.setLocations(mLocations, { transaction });
+
+    await meeting.addSurvey(survey, { transaction });
+
+    return await survey.reload({
+      include: [{ model: Location, as: 'locations' }]
+    });
+  });
+
+  res.status(200).json(survey);
 });
 
 module.exports = router;
