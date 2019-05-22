@@ -12,11 +12,17 @@ describe('Registration', () => {
   beforeEach(() => {
     sequelize.sync({ force: true });
 
-    attributes = {
-      name: faker.name.findName(),
-      email: faker.internet.email(),
-      password: 'M1Ryl9n5'
-    };
+    const name = faker.name
+      .findName()
+      .trim()
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+    const email = faker.internet
+      .email()
+      .trim()
+      .toLowerCase();
+    attributes = { name, email, password: 'M1Ryl9n5' };
   });
 
   const exec = async () =>

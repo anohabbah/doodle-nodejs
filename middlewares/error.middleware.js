@@ -1,7 +1,7 @@
 const { createLogger, transports, format } = require('winston');
 
 const configTransports =
-  process.env.NODE_ENV !== 'production'
+  process.env.NODE_ENV === 'development'
     ? [new transports.Console({ format: format['prettyPrint']() })]
     : [new transports.File({ filename: 'error.log' })];
 

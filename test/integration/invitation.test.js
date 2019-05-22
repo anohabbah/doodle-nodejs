@@ -74,4 +74,13 @@ describe('Invitation Test', () => {
     const res = await exec();
     expect(res.statusCode).toBe(403);
   });
+
+  it('should throw if meeting owner try to invite itself', async () => {
+    await meeting.setOwner(user);
+    body.push(user.email);
+
+    const res = await exec();
+
+    expect(res.statusCode).toBe(403);
+  });
 });

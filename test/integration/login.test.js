@@ -13,8 +13,9 @@ describe('Login', () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
 
+    const email = faker.internet.email();
     credentials = {
-      email: faker.internet.email(),
+      email,
       password: 'M1Ryl9n5'
     };
 

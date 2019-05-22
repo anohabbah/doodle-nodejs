@@ -51,7 +51,7 @@ describe('Meeting Unit Test', () => {
     await meeting.setParticipants([user1, user2]);
     participants = await meeting.getParticipants();
     participants = _.map(parse(participants), p =>
-      _.omit(p, 'MeetingParticipant')
+      _.omit(p, 'meeting_participants')
     );
     expect(participants).toEqual(expect.arrayContaining([parse(user1)]));
     expect(participants).toEqual(expect.arrayContaining([parse(user2)]));

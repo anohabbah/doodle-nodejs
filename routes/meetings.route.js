@@ -13,7 +13,6 @@ const {
   createNotFoundError
 } = require('../utils/create-error.util');
 const { authMiddleware } = require('../middlewares/auth.middleware');
-const { parse } = require('../utils/app.util');
 
 router['use'](authMiddleware);
 
@@ -92,10 +91,16 @@ router['delete']('/:meetingId', async (req, res) => {
 
 router['post']('/:meetingId/surveys', async (req, res) => {
   const survey = await sequelize.transaction(async transaction => {
+    const authUserId = parseInt(req['user'], 10);
     const { locations } = req.body;
     const { meetingId } = req.params;
 
     const meeting = await Meeting.findByPk(meetingId);
+
+    if (meeting.ownerId !== authUserId)
+      throw createForbiddenError(
+        'Forbidden ! Only meeting owner can add a survey to it.'
+      );
 
     const survey = await Survey.create({}, { transaction });
 
@@ -132,6 +137,10 @@ router['post']('/:meetingId/invitations', async (req, res) => {
   const users = await User.findAll({
     where: { email: { [Op.in]: participants } }
   });
+
+  if (users.map(user => user.id).includes(authUserId)) {
+    throw createForbiddenError('Meeting owner can not invite itself');
+  }
 
   await meeting.setParticipants(users);
   await meeting.reload({

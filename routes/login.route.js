@@ -46,7 +46,9 @@ async function attemptLogin(credentials, user, res) {
 router['post']('/', async (req, res) => {
   const credentials = req.body;
 
-  const user = await User.findOne({ where: { email: credentials.email } });
+  const user = await User.findOne({
+    where: { email: credentials.email.trim().toLowerCase() }
+  });
   if (!user) return res.status(422).json('Email or Password invalid.');
 
   await loginAndBuildResponse(credentials, user, res);

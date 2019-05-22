@@ -8,11 +8,12 @@ describe('Surveys', () => {
   let meeting;
   let sessionTokenString;
   let body;
+  let user;
 
   beforeEach(async () => {
     await sequelize.sync({ force: true });
 
-    const user = await User.create({
+    user = await User.create({
       name: Faker.name.findName(),
       email: Faker.internet.email(),
       password: Faker.internet.password()
@@ -41,7 +42,8 @@ describe('Surveys', () => {
       .send(body)
       .set('Cookie', sessionTokenString);
 
-  it('should create a survey', async () => {
+  it('should create a survey user is authenticated', async () => {
+    await meeting.setOwner(user);
     const res = await exec();
 
     expect(res.statusCode).toBe(200);
@@ -54,5 +56,10 @@ describe('Surveys', () => {
     sessionTokenString = '';
     const res = await exec();
     expect(res.statusCode).toBe(401);
+  });
+
+  it('should throw if auth user is not the meeting owner', async () => {
+    const res = await exec();
+    expect(res.statusCode).toBe(403);
   });
 });
