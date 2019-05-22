@@ -1,9 +1,19 @@
 const router = require('express').Router();
-const { Meeting, Survey, Location, sequelize } = require('./../models');
+const {
+  Meeting,
+  Survey,
+  Location,
+  User,
+  sequelize,
+  Sequelize
+} = require('./../models');
 const _ = require('lodash');
-const { createForbiddenError } = require('../utils/create-error.util');
+const {
+  createForbiddenError,
+  createNotFoundError
+} = require('../utils/create-error.util');
 const { authMiddleware } = require('../middlewares/auth.middleware');
-const { createNotFoundError } = require('../utils/create-error.util');
+const { parse } = require('../utils/app.util');
 
 router['use'](authMiddleware);
 
@@ -104,6 +114,31 @@ router['post']('/:meetingId/surveys', async (req, res) => {
   });
 
   res.status(200).json(survey);
+});
+
+// INVITATIONS
+
+router['post']('/:meetingId/invitations', async (req, res) => {
+  const { participants } = req.body;
+  const authUserId = parseInt(req['user'], 10);
+
+  const meeting = await Meeting.findByPk(req.params['meetingId']);
+  if (!meeting) throw createNotFoundError('Not Found! Resource not found.');
+
+  if (meeting.ownerId !== authUserId)
+    throw createForbiddenError('Forbidden ! Only meeting owner can invite.');
+
+  const Op = Sequelize.Op;
+  const users = await User.findAll({
+    where: { email: { [Op.in]: participants } }
+  });
+
+  await meeting.setParticipants(users);
+  await meeting.reload({
+    include: [{ model: User, as: 'participants' }]
+  });
+
+  res.status(200).json(meeting);
 });
 
 module.exports = router;

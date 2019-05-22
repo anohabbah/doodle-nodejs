@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
   Meeting.associate = function({ User, Survey }) {
     Meeting.belongsTo(User, { as: 'owner' });
     Meeting.belongsToMany(User, {
-      through: 'MeetingParticipant',
+      through: 'meeting_participants',
       as: 'participants',
       foreignKey: 'meetingId',
       otherKey: 'participantId'

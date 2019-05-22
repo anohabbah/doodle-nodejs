@@ -23,7 +23,6 @@ module.exports = (sequelize, DataTypes) => {
 
   Survey.associate = function({ Meeting, User, Location }) {
     Survey.belongsTo(Meeting, { as: 'meeting' });
-    Survey.belongsToMany(User, { as: 'voters', through: 'SurveyVoter' });
     Survey.hasMany(Location, { as: 'locations' });
   };
 

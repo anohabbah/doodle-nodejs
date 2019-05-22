@@ -29,8 +29,9 @@ module.exports = (sequelize, DataTypes) => {
     Location.belongsTo(Survey, { as: 'survey' });
     Location.belongsToMany(User, {
       as: 'voters',
-      through: 'LocationVoter',
-      otherKey: 'voter_id'
+      through: 'location_voters',
+      foreignKey: 'locationId',
+      otherKey: 'voterId'
     });
   };
 
