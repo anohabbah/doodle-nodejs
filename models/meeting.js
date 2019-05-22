@@ -28,7 +28,8 @@ module.exports = (sequelize, DataTypes) => {
     Meeting.belongsToMany(User, {
       through: 'MeetingParticipant',
       as: 'participants',
-      otherKey: 'participant_id'
+      foreignKey: 'meetingId',
+      otherKey: 'participantId'
     });
     Meeting.hasMany(Survey, { as: 'survey' });
   };
