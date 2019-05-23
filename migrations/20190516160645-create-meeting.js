@@ -21,6 +21,7 @@ module.exports = {
         type: Sequelize.TEXT
       },
       pause: {
+        defaultValue: false,
         type: Sequelize.BOOLEAN
       },
       created_at: {

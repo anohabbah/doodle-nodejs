@@ -97,6 +97,8 @@ router['post']('/:meetingId/surveys', async (req, res) => {
 
     const meeting = await Meeting.findByPk(meetingId);
 
+    if (!meeting) throw createNotFoundError('Not Found! Resource not found.');
+
     if (meeting.ownerId !== authUserId)
       throw createForbiddenError(
         'Forbidden ! Only meeting owner can add a survey to it.'

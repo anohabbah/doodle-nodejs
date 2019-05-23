@@ -1,7 +1,8 @@
 'use strict';
+
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('surveys', {
+    return queryInterface.createTable('date_surveys', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,22 +13,27 @@ module.exports = {
         type: Sequelize.INTEGER,
         references: { model: 'meetings', key: 'id' }
       },
+      meetingable_id: Sequelize.INTEGER,
+      meetingable: {
+        defaultValue: 'Date',
+        type: Sequelize.STRING
+      },
       link: {
         unique: true,
         allowNull: false,
         type: Sequelize.STRING
       },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('surveys');
+    return queryInterface.dropTable('date_surveys');
   }
 };

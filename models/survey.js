@@ -1,29 +1,52 @@
 'use strict';
 
-// TODO: For security reasons think to override validation messages
 module.exports = (sequelize, DataTypes) => {
   const Survey = sequelize.define(
     'Survey',
     {
-      link: {
-        type: DataTypes.STRING,
-        unique: true,
-        validate: { notEmpty: true, isUrl: true }
-      }
+      surveyable: DataTypes.STRING,
+      surveyableId: DataTypes.INTEGER
     },
     {
-      hooks: {
-        async afterCreate(instance, options) {
-          const link = 'http://127.0.0.1:3000/api/surveys/1';
-          await instance.update({ link });
+      timestamps: false,
+      getterMethods: {
+        getItem(options) {
+          return this[
+            'get' +
+              this.get('surveyable')[0].toUpperCase() +
+              this.get('surveyable').slice(1)
+          ](options);
         }
       }
     }
   );
 
-  Survey.associate = function({ Meeting, User, Location }) {
-    Survey.belongsTo(Meeting, { as: 'meeting' });
-    Survey.hasMany(Location, { as: 'locations' });
+  Survey.associate = function(models) {
+    Survey.belongsTo(models['Meeting'], { as: 'meeting' });
+
+    Survey.belongsTo(models['DateSurvey'], {
+      foreignKey: 'surveyableId',
+      constraints: false,
+      as: 'survey'
+    });
+
+    Survey.belongsTo(models['DateAndLocationSurvey'], {
+      foreignKey: 'surveyableId',
+      constraints: false,
+      as: 'survey'
+    });
+
+    Survey.belongsTo(models['LocationSurvey'], {
+      foreignKey: 'surveyableId',
+      constraints: false,
+      as: 'survey'
+    });
+
+    Survey.belongsTo(models['MealSurvey'], {
+      foreignKey: 'surveyableId',
+      constraints: false,
+      as: 'survey'
+    });
   };
 
   return Survey;

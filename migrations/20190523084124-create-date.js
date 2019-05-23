@@ -2,28 +2,25 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('locations', {
+    return queryInterface.createTable('dates', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      surveyable: {
+      timestamp: {
+        type: Sequelize.DATE
+      },
+      dateable: {
         type: Sequelize.STRING
       },
-      surveyable_id: {
+      dateable_id: {
         type: Sequelize.INTEGER
-      },
-      address: {
-        type: {
-          allowNull: false,
-          type: Sequelize.STRING
-        }
       }
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('locations');
+    return queryInterface.dropTable('dates');
   }
 };

@@ -9,6 +9,7 @@ describe('Surveys', () => {
   let sessionTokenString;
   let body;
   let user;
+  let apiURL;
 
   beforeEach(async () => {
     await sequelize.sync({ force: true });
@@ -27,6 +28,8 @@ describe('Surveys', () => {
       description: Faker.lorem.text()
     });
 
+    apiURL = `/api/meetings/${meeting.id}/surveys`;
+
     body = {
       locations: [
         Faker.address.streetAddress(true),
@@ -38,7 +41,7 @@ describe('Surveys', () => {
 
   const exec = () =>
     request(app)
-      .post(`/api/meetings/${meeting.id}/surveys`)
+      .post(apiURL)
       .send(body)
       .set('Cookie', sessionTokenString);
 
@@ -61,5 +64,11 @@ describe('Surveys', () => {
   it('should throw if auth user is not the meeting owner', async () => {
     const res = await exec();
     expect(res.statusCode).toBe(403);
+  });
+
+  it('should throw if the given meeting does not exist', async () => {
+    apiURL = `/api/meetings/60/surveys`;
+    const res = await exec();
+    expect(res.statusCode).toBe(404);
   });
 });
