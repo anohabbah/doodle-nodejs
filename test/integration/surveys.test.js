@@ -37,6 +37,7 @@ describe('Surveys', () => {
       title: Faker.lorem.sentence(),
       description: Faker.lorem.text()
     });
+    await meeting.setOwner(user);
 
     apiURL = `/api/meetings/${meeting.id}/surveys`;
 
@@ -63,7 +64,6 @@ describe('Surveys', () => {
       .set('Cookie', sessionTokenString);
 
   it('should create a Date survey', async () => {
-    await meeting.setOwner(user);
     const res = await exec();
 
     const surveys = await Survey.findAll();
@@ -74,9 +74,24 @@ describe('Surveys', () => {
     expect(map).toEqual(expect.arrayContaining(parse(body.dates)));
   });
 
-  it('should create a Location survey', async () => {
-    await meeting.setOwner(user);
+  it('should require dates when creating a Date survey', async () => {
+    delete body.dates;
 
+    const res = await exec();
+
+    expect(res.statusCode).toBe(422);
+  });
+
+  it('should require array value for `dates` when creating a Date survey', async () => {
+    let res = await exec();
+    expect(res.statusCode).toBe(200);
+
+    body.dates = '';
+    res = await exec();
+    expect(res.statusCode).toBe(422);
+  });
+
+  it('should create a Location survey', async () => {
     body.surveyType = SURVEY_TYPE.LocationSurvey;
 
     const res = await exec();
@@ -89,9 +104,26 @@ describe('Surveys', () => {
     expect(map).toEqual(expect.arrayContaining(parse(body.locations)));
   });
 
-  it('should create Date and Location survey', async () => {
-    await meeting.setOwner(user);
+  it('should require locations when creating a Location survey', async () => {
+    delete body.locations;
+    body.surveyType = SURVEY_TYPE.LocationSurvey;
 
+    const res = await exec();
+
+    expect(res.statusCode).toBe(422);
+  });
+
+  it('should require array value for `locations` when creating a Date survey', async () => {
+    let res = await exec();
+    body.surveyType = SURVEY_TYPE.LocationSurvey;
+    expect(res.statusCode).toBe(200);
+
+    body.locations = '';
+    res = await exec();
+    expect(res.statusCode).toBe(422);
+  });
+
+  it('should create Date and Location survey', async () => {
     body.surveyType = SURVEY_TYPE.LocationAndDateSurvey;
 
     const res = await exec();
@@ -108,6 +140,27 @@ describe('Surveys', () => {
     expect(map2).toEqual(expect.arrayContaining(parse(body.dates)));
   });
 
+  it('should require dates and locations when creating Date and Location survey', async () => {
+    delete body.locations;
+    delete body.dates;
+    body.surveyType = SURVEY_TYPE.LocationAndDateSurvey;
+
+    const res = await exec();
+
+    expect(res.statusCode).toBe(422);
+  });
+
+  it('should require array value for `locations` when creating a Date survey', async () => {
+    let res = await exec();
+    body.surveyType = SURVEY_TYPE.LocationAndDateSurvey;
+    expect(res.statusCode).toBe(200);
+
+    body.locations = '';
+    body.dates = '';
+    res = await exec();
+    expect(res.statusCode).toBe(422);
+  });
+
   it('should create a Meal survey', async () => {
     delete body.dates;
     delete body.locations;
@@ -117,8 +170,6 @@ describe('Surveys', () => {
       Faker.lorem.words(),
       Faker.lorem.words()
     ];
-
-    await meeting.setOwner(user);
 
     body.surveyType = SURVEY_TYPE.MealSurvey;
 
@@ -132,6 +183,29 @@ describe('Surveys', () => {
     expect(map2).toEqual(expect.arrayContaining(parse(body.meals)));
   });
 
+  it('should should require meals when creating a Meal survey', async () => {
+    body.surveyType = SURVEY_TYPE.MealSurvey;
+
+    const res = await exec();
+
+    expect(res.statusCode).toBe(422);
+  });
+
+  it('should require array value for `locations` when creating a Date survey', async () => {
+    body.meals = '';
+    body.surveyType = SURVEY_TYPE.MealSurvey;
+    let res = await exec();
+    expect(res.statusCode).toBe(422);
+
+    body['meals'] = [
+      Faker.lorem.words(),
+      Faker.lorem.words(),
+      Faker.lorem.words()
+    ];
+    res = await exec();
+    expect(res.statusCode).toBe(200);
+  });
+
   it('should throw if user is not authenticated', async () => {
     sessionTokenString = '';
     const res = await exec();
@@ -139,6 +213,7 @@ describe('Surveys', () => {
   });
 
   it('should throw if auth user is not the meeting owner', async () => {
+    await meeting.setOwner(null);
     const res = await exec();
     expect(res.statusCode).toBe(403);
   });
@@ -147,5 +222,13 @@ describe('Surveys', () => {
     apiURL = `/api/meetings/60/surveys`;
     const res = await exec();
     expect(res.statusCode).toBe(404);
+  });
+
+  it('should throw if surveyType is not provided', async () => {
+    delete body.surveyType;
+
+    const res = await exec();
+
+    expect(res.statusCode).toBe(422);
   });
 });

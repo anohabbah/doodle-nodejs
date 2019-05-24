@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const Joi = require('@hapi/joi');
 const { parse } = require('./../utils/app.util');
 const {
   Meeting,
@@ -195,8 +196,7 @@ router['delete']('/:meetingId', async (req, res) => {
 
 router['post']('/:meetingId/surveys', async (req, res) => {
   const authUserId = parseInt(req['user'], 10);
-  const surveyType = parseInt(req.body['surveyType'], 10);
-  // const { locations } = req.body;
+  // const surveyType = parseInt(req.body['surveyType'], 10);
   const { meetingId } = req.params;
 
   const meeting = await Meeting.findByPk(meetingId);
@@ -208,28 +208,91 @@ router['post']('/:meetingId/surveys', async (req, res) => {
       'Forbidden ! Only meeting owner can add a survey to it.'
     );
 
+  // validate surveyType
+  // prettier-ignore
+  const { error, value: surveyType } = Joi.validate(req.body.surveyType, Joi.number().integer().positive().min(1).max(4).required());
+  if (error)
+    return res.status(422).json({ message: '`surveyType` ' + error.message });
+
+  // const body = req.body;
+  // const schema = Joi.object().keys({
+  //   // prettier-ignore
+  //   surveyType: Joi.number().integer().positive().min(1).max(4).required(),
+  //   // prettier-ignore
+  //   dates: Joi.array().items(Joi.date().min('now').required()),
+  //   locations: Joi.array().items(Joi.string().required()),
+  //   meals: Joi.array().items(Joi.string().required())
+  // });
+
   let survey;
   switch (surveyType) {
     case SURVEY_TYPE.DateSurvey: {
       const { dates } = req.body;
+
+      const { error } = Joi.validate(
+        { dates },
+        {
+          // prettier-ignore
+          dates: Joi.array()
+            .items(Joi.date().min('now').required())
+            .required()
+        }
+      );
+      if (error) return res.status(422).json({ message: error.message });
+
       survey = await createDateSurvey(dates, meetingId);
       break;
     }
 
     case SURVEY_TYPE.LocationSurvey: {
       const { locations } = req.body;
+
+      const { error } = Joi.validate(
+        { locations },
+        {
+          locations: Joi.array()
+            .items(Joi.string().required())
+            .required()
+        }
+      );
+      if (error) return res.status(422).json({ message: error.message });
+
       survey = await createLocationSurvey(locations, meetingId);
       break;
     }
 
     case SURVEY_TYPE.LocationAndDateSurvey: {
       const { dates, locations } = req.body;
+
+      const { error } = Joi.validate(
+        { locations, dates },
+        {
+          // prettier-ignore
+          locations: Joi.array().items(Joi.string().required()).required(),
+          // prettier-ignore
+          dates: Joi.array()
+            .items(Joi.date().min('now').required())
+            .required()
+        }
+      );
+      if (error) return res.status(422).json({ message: error.message });
+
       survey = await createLocationAndDateSurvey(dates, locations, meetingId);
       break;
     }
 
     case SURVEY_TYPE.MealSurvey: {
       const { meals } = req.body;
+
+      const { error } = Joi.validate(
+        { meals },
+        {
+          // prettier-ignore
+          meals: Joi.array().items(Joi.string().required()).required()
+        }
+      );
+      if (error) return res.status(422).json({ message: error.message });
+
       survey = await createMealSurvey(meals, meetingId);
       break;
     }
