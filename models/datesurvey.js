@@ -7,10 +7,16 @@ module.exports = (sequelize, DataTypes) => {
       link: {
         type: DataTypes.STRING,
         unique: true,
-        validate: { notEmpty: true, isUrl: true }
+        validate: { notEmpty: true }
       }
     },
-    {}
+    {
+      hooks: {
+        async afterCreate(instance, options) {
+          await instance.update({ link: '/surveys/' + instance.id });
+        }
+      }
+    }
   );
   DateSurvey.associate = function({ Survey, Date }) {
     DateSurvey.hasMany(Survey, {
@@ -22,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
     DateSurvey.hasMany(Date, {
       foreignKey: 'dateableId',
       constraints: false,
-      scope: { surveyable: 'DateSurvey' }
+      scope: { dateable: 'DateSurvey' }
     });
   };
 

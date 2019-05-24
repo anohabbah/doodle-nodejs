@@ -9,8 +9,8 @@ describe('Registration', () => {
   faker.locale = 'fr';
   let attributes;
 
-  beforeEach(() => {
-    sequelize.sync({ force: true });
+  beforeEach(async () => {
+    await sequelize.sync({ force: true });
 
     const name = faker.name
       .findName()

@@ -7,10 +7,16 @@ module.exports = (sequelize, DataTypes) => {
       link: {
         type: DataTypes.STRING,
         unique: true,
-        validate: { notEmpty: true, isUrl: true }
+        validate: { notEmpty: true }
       }
     },
-    {}
+    {
+      hooks: {
+        async afterCreate(instance, options) {
+          await instance.update({ link: '/surveys/' + instance.id });
+        }
+      }
+    }
   );
   LocationAndDateSurvey.associate = function({ Survey, Location, Date }) {
     LocationAndDateSurvey.hasMany(Survey, {
@@ -22,13 +28,13 @@ module.exports = (sequelize, DataTypes) => {
     LocationAndDateSurvey.hasMany(Location, {
       foreignKey: 'locationableId',
       constraints: false,
-      scope: { surveyable: 'LocationAndDateSurvey' }
+      scope: { locationable: 'LocationAndDateSurvey' }
     });
 
     LocationAndDateSurvey.hasMany(Date, {
       foreignKey: 'dateableId',
       constraints: false,
-      scope: { surveyable: 'LocationAndDateSurvey' }
+      scope: { dateable: 'LocationAndDateSurvey' }
     });
   };
 

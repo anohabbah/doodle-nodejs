@@ -24,7 +24,18 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    { timestamps: false }
+    {
+      timestamps: false,
+      getterMethods: {
+        getItem(options) {
+          return this[
+            'get' +
+              this.get('locationable')[0].toUpperCase() +
+              this.get('locationable').slice(1)
+          ](options);
+        }
+      }
+    }
   );
 
   Location.associate = function(models) {
@@ -39,13 +50,13 @@ module.exports = (sequelize, DataTypes) => {
     Location.belongsTo(models['DateSurvey'], {
       foreignKey: 'locationableId',
       constraints: false,
-      as: 'survey'
+      as: 'dateSurvey'
     });
 
     Location.belongsTo(models['LocationAndDateSurvey'], {
       foreignKey: 'locationableId',
       constraints: false,
-      as: 'survey'
+      as: 'locationAndDateSurvey'
     });
   };
 

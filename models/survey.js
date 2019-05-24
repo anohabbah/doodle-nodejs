@@ -27,25 +27,25 @@ module.exports = (sequelize, DataTypes) => {
     Survey.belongsTo(models['DateSurvey'], {
       foreignKey: 'surveyableId',
       constraints: false,
-      as: 'survey'
+      as: 'dateSurvey'
     });
 
-    Survey.belongsTo(models['DateAndLocationSurvey'], {
+    Survey.belongsTo(models['LocationAndDateSurvey'], {
       foreignKey: 'surveyableId',
       constraints: false,
-      as: 'survey'
+      as: 'locationAndDateSurvey'
     });
 
     Survey.belongsTo(models['LocationSurvey'], {
       foreignKey: 'surveyableId',
       constraints: false,
-      as: 'survey'
+      as: 'locationSurvey'
     });
 
     Survey.belongsTo(models['MealSurvey'], {
       foreignKey: 'surveyableId',
       constraints: false,
-      as: 'survey'
+      as: 'mealSurvey'
     });
   };
 

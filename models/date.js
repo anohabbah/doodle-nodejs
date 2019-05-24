@@ -24,13 +24,13 @@ module.exports = (sequelize, DataTypes) => {
     Date.belongsTo(DateSurvey, {
       foreignKey: 'dateableId',
       constraints: false,
-      as: 'date'
+      as: 'dateSurvey'
     });
 
     Date.belongsTo(LocationAndDateSurvey, {
       foreignKey: 'dateableId',
       constraints: false,
-      as: 'date'
+      as: 'locationAndDateSurvey'
     });
   };
 
