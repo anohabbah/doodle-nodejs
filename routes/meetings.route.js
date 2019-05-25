@@ -214,16 +214,6 @@ router['post']('/:meetingId/surveys', async (req, res) => {
   if (error)
     return res.status(422).json({ message: '`surveyType` ' + error.message });
 
-  // const body = req.body;
-  // const schema = Joi.object().keys({
-  //   // prettier-ignore
-  //   surveyType: Joi.number().integer().positive().min(1).max(4).required(),
-  //   // prettier-ignore
-  //   dates: Joi.array().items(Joi.date().min('now').required()),
-  //   locations: Joi.array().items(Joi.string().required()),
-  //   meals: Joi.array().items(Joi.string().required())
-  // });
-
   let survey;
   switch (surveyType) {
     case SURVEY_TYPE.DateSurvey: {

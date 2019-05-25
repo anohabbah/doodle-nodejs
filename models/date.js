@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     }
   );
-  Date.associate = function({ DateSurvey, LocationAndDateSurvey }) {
+  Date.associate = function({ DateSurvey, LocationAndDateSurvey, Vote }) {
     Date.belongsTo(DateSurvey, {
       foreignKey: 'dateableId',
       constraints: false,
@@ -31,6 +31,12 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'dateableId',
       constraints: false,
       as: 'locationAndDateSurvey'
+    });
+
+    Date.hasMany(Vote, {
+      foreignKey: 'voteableId',
+      constraints: false,
+      scope: { voteable: 'Date' }
     });
   };
 

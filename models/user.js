@@ -38,8 +38,10 @@ module.exports = (sequelize, DataTypes) => {
     {}
   );
 
-  User.associate = function({ Meeting }) {
+  User.associate = function({ Meeting, Vote }) {
     User.hasMany(Meeting, { as: 'meetings', foreignKey: 'ownerId' });
+
+    User.hasMany(Vote, { as: 'votes', foreignKey: 'voter_id' });
   };
 
   return User;

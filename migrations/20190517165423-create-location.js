@@ -16,10 +16,8 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       address: {
-        type: {
-          allowNull: false,
-          type: Sequelize.STRING
-        }
+        type: Sequelize.STRING,
+        allowNull: false
       }
     });
   },

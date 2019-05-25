@@ -9,11 +9,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      meetingable_id: Sequelize.INTEGER,
-      meetingable: {
-        defaultValue: 'Meal',
-        type: Sequelize.STRING
-      },
       link: {
         unique: true,
         allowNull: false,

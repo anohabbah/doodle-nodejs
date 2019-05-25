@@ -2,31 +2,15 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('surveys', {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
-      },
       meeting_id: {
         type: Sequelize.INTEGER,
         references: { model: 'meetings', key: 'id' }
       },
-      link: {
-        unique: true,
-        allowNull: false,
-        type: Sequelize.STRING
-      },
-      created_at: {
-        allowNull: false,
-        type: Sequelize.DATE
-      },
-      updated_at: {
-        allowNull: false,
-        type: Sequelize.DATE
-      }
+      surveyable: Sequelize.STRING,
+      surveyable_id: Sequelize.INTEGER
     });
   },
+
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('surveys');
   }

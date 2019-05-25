@@ -9,15 +9,6 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      meeting_id: {
-        type: Sequelize.INTEGER,
-        references: { model: 'meetings', key: 'id' }
-      },
-      meetingable_id: Sequelize.INTEGER,
-      meetingable: {
-        defaultValue: 'Date',
-        type: Sequelize.STRING
-      },
       link: {
         unique: true,
         allowNull: false,

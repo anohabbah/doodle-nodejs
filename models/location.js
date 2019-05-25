@@ -58,6 +58,12 @@ module.exports = (sequelize, DataTypes) => {
       constraints: false,
       as: 'locationAndDateSurvey'
     });
+
+    Location.hasMany(models['Vote'], {
+      foreignKey: 'voteableId',
+      constraints: false,
+      scope: { voteable: 'Location' }
+    });
   };
 
   return Location;
