@@ -8,12 +8,11 @@ const {
   sequelize,
   Survey,
   User,
-  Meal,
   Meeting,
-  Date,
-  Location,
   SurveyType
 } = require('./../../models');
+
+// TODO: a meeting can not have 2 surveys with the same type
 
 describe('Surveys', () => {
   let meeting;

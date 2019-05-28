@@ -13,7 +13,7 @@ describe('Invitation Test', () => {
   let body = [];
 
   beforeEach(async () => {
-    await sequelize.sync();
+    await sequelize.sync({ force: true });
 
     user = await User.create(userAttrFactory());
     meeting = await Meeting.create({

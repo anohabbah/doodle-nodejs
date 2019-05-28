@@ -13,7 +13,6 @@ const {
   createNotFoundError
 } = require('../utils/create-error.util');
 const { authMiddleware } = require('../middlewares/auth.middleware');
-const { surveyTypes } = require('../utils/constants.util');
 
 router['use'](authMiddleware);
 

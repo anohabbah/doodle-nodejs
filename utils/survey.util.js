@@ -1,11 +1,10 @@
-const { parse } = require('./../utils/app.util');
 const { Date, sequelize, Survey, Location, Meal } = require('./../models');
 
 /**
  *
  * @param {Object} transaction
- * @param {Meeting} meeting
- * @param {SurveyType} surveyType
+ * @param {Meeting | number} meeting
+ * @param {SurveyType | number} surveyType
  * @return {Promise<Survey>}
  */
 async function createSurvey(transaction, meeting, surveyType) {
@@ -18,8 +17,8 @@ async function createSurvey(transaction, meeting, surveyType) {
 /**
  *
  * @param {string[]} dates
- * @param {Meeting} meeting
- * @param {SurveyType} surveyType
+ * @param {Meeting | number} meeting
+ * @param {SurveyType | number} surveyType
  * @return {Promise<Object>}
  */
 async function createDateSurvey(dates, meeting, surveyType) {
@@ -40,8 +39,8 @@ async function createDateSurvey(dates, meeting, surveyType) {
 /**
  *
  * @param {string[]} locations
- * @param {Meeting} meeting
- * @param {SurveyType} surveyType
+ * @param {Meeting | number} meeting
+ * @param {SurveyType | number} surveyType
  * @return {Promise<Object>}
  */
 async function createLocationSurvey(locations, meeting, surveyType) {
@@ -65,8 +64,8 @@ async function createLocationSurvey(locations, meeting, surveyType) {
  *
  * @param {string[]} dates
  * @param {string[]} locations
- * @param {Meeting} meeting
- * @param {SurveyType} surveyType
+ * @param {Meeting | number} meeting
+ * @param {SurveyType | number} surveyType
  * @return {Promise<Object>}
  */
 async function createLocationAndDateSurvey(
@@ -84,10 +83,6 @@ async function createLocationAndDateSurvey(
       mDates.push(d);
     }
     await survey.setDates(mDates, { transaction });
-
-    for (const address of locations) {
-      await survey.createLocation({ address }, { transaction });
-    }
 
     const mLocations = [];
     for (const address of locations) {
@@ -108,8 +103,8 @@ async function createLocationAndDateSurvey(
 /**
  *
  * @param {string[]} meals
- * @param {Meeting} meeting
- * @param {SurveyType} surveyType
+ * @param {Meeting | number} meeting
+ * @param {SurveyType | number} surveyType
  * @return {Promise<Object>}
  */
 async function createMealSurvey(meals, meeting, surveyType) {
