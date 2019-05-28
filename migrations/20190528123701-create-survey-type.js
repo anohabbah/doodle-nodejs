@@ -2,14 +2,14 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('location_surveys', {
+    return queryInterface.createTable('survey_types', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      link: {
+      name: {
         unique: true,
         allowNull: false,
         type: Sequelize.STRING
@@ -24,7 +24,8 @@ module.exports = {
       }
     });
   },
+
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('location_surveys');
+    return queryInterface.dropTable('survey_types');
   }
 };

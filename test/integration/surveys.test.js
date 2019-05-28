@@ -3,7 +3,7 @@ const app = require('./../../app');
 const Faker = require('faker');
 const { parse } = require('../../utils/app.util');
 const { createSessionToken } = require('../../utils/security.util');
-const { SURVEY_TYPE } = require('../../utils/constants.util');
+const { surveyTypes } = require('../../utils/constants.util');
 const {
   sequelize,
   Survey,
@@ -11,7 +11,8 @@ const {
   Meal,
   Meeting,
   Date,
-  Location
+  Location,
+  SurveyType
 } = require('./../../models');
 
 describe('Surveys', () => {
@@ -20,9 +21,19 @@ describe('Surveys', () => {
   let body;
   let user;
   let apiURL;
+  const types = [
+    'DateSurvey',
+    'MealSurvey',
+    'LocationSurvey',
+    'LocationAndDateSurvey'
+  ];
 
   beforeEach(async () => {
     await sequelize.sync({ force: true });
+
+    for (const name of types) {
+      await SurveyType.create({ name });
+    }
 
     user = await User.create({
       name: Faker.name.findName(),
@@ -42,7 +53,7 @@ describe('Surveys', () => {
     apiURL = `/api/meetings/${meeting.id}/surveys`;
 
     body = {
-      surveyType: SURVEY_TYPE.DateSurvey,
+      surveyType: surveyTypes.DATE_SURVEY,
       locations: [
         Faker.address.streetAddress(true),
         Faker.address.streetAddress(true),
@@ -67,11 +78,16 @@ describe('Surveys', () => {
     const res = await exec();
 
     const surveys = await Survey.findAll();
-    const dates = await Date.findAll();
     expect(surveys.length).toBe(1);
-    expect(dates.length).toBeGreaterThanOrEqual(4);
+    expect(res.body.dates.length).toBe(4);
     const map = res.body.dates.map(i => i.timestamp);
     expect(map).toEqual(expect.arrayContaining(parse(body.dates)));
+  });
+
+  it('should require valid survey type', async () => {
+    body.surveyType = 6;
+    const res = await exec();
+    expect(res.statusCode).toBe(422);
   });
 
   it('should require dates when creating a Date survey', async () => {
@@ -92,30 +108,29 @@ describe('Surveys', () => {
   });
 
   it('should create a Location survey', async () => {
-    body.surveyType = SURVEY_TYPE.LocationSurvey;
+    body.surveyType = surveyTypes.LOCATION_SURVEY;
 
     const res = await exec();
 
     const surveys = await Survey.findAll();
-    const locations = await Location.findAll();
     expect(surveys.length).toBe(1);
-    expect(locations.length).toBeGreaterThanOrEqual(3);
+    expect(res.body.locations.length).toBe(3);
     const map = res.body.locations.map(i => i.address);
     expect(map).toEqual(expect.arrayContaining(parse(body.locations)));
   });
 
   it('should require locations when creating a Location survey', async () => {
     delete body.locations;
-    body.surveyType = SURVEY_TYPE.LocationSurvey;
+    body.surveyType = surveyTypes.LOCATION_SURVEY;
 
     const res = await exec();
 
     expect(res.statusCode).toBe(422);
   });
 
-  it('should require array value for `locations` when creating a Date survey', async () => {
+  it('should require array value for `locations` when creating a Location survey', async () => {
     let res = await exec();
-    body.surveyType = SURVEY_TYPE.LocationSurvey;
+    body.surveyType = surveyTypes.LOCATION_SURVEY;
     expect(res.statusCode).toBe(200);
 
     body.locations = '';
@@ -124,16 +139,14 @@ describe('Surveys', () => {
   });
 
   it('should create Date and Location survey', async () => {
-    body.surveyType = SURVEY_TYPE.LocationAndDateSurvey;
+    body.surveyType = surveyTypes.LOCATION_AND_DATE_SURVEY;
 
     const res = await exec();
 
     const surveys = await Survey.findAll();
-    const locations = await Location.findAll();
-    const dates = await Date.findAll();
     expect(surveys.length).toBe(1);
-    expect(dates.length).toBeGreaterThanOrEqual(4);
-    expect(locations.length).toBeGreaterThanOrEqual(3);
+    expect(res.body.dates.length).toBe(4);
+    expect(res.body.locations.length).toBe(3);
     const map = res.body.locations.map(i => i.address);
     expect(map).toEqual(expect.arrayContaining(parse(body.locations)));
     const map2 = res.body.dates.map(i => i.timestamp);
@@ -143,16 +156,16 @@ describe('Surveys', () => {
   it('should require dates and locations when creating Date and Location survey', async () => {
     delete body.locations;
     delete body.dates;
-    body.surveyType = SURVEY_TYPE.LocationAndDateSurvey;
+    body.surveyType = surveyTypes.LOCATION_AND_DATE_SURVEY;
 
     const res = await exec();
 
     expect(res.statusCode).toBe(422);
   });
 
-  it('should require array value for `locations` when creating a Date survey', async () => {
+  it('should require array value for `locations` when creating a Date and Location survey', async () => {
     let res = await exec();
-    body.surveyType = SURVEY_TYPE.LocationAndDateSurvey;
+    body.surveyType = surveyTypes.LOCATION_AND_DATE_SURVEY;
     expect(res.statusCode).toBe(200);
 
     body.locations = '';
@@ -171,20 +184,19 @@ describe('Surveys', () => {
       Faker.lorem.words()
     ];
 
-    body.surveyType = SURVEY_TYPE.MealSurvey;
+    body.surveyType = surveyTypes.MEAL_SURVEY;
 
     const res = await exec();
 
     const surveys = await Survey.findAll();
-    const meals = await Meal.findAll();
     expect(surveys.length).toBe(1);
-    expect(meals.length).toBeGreaterThanOrEqual(3);
+    expect(res.body.meals.length).toBe(3);
     const map2 = res.body.meals.map(i => i.name);
     expect(map2).toEqual(expect.arrayContaining(parse(body.meals)));
   });
 
   it('should should require meals when creating a Meal survey', async () => {
-    body.surveyType = SURVEY_TYPE.MealSurvey;
+    body.surveyType = surveyTypes.MEAL_SURVEY;
 
     const res = await exec();
 
@@ -193,7 +205,7 @@ describe('Surveys', () => {
 
   it('should require array value for `locations` when creating a Date survey', async () => {
     body.meals = '';
-    body.surveyType = SURVEY_TYPE.MealSurvey;
+    body.surveyType = surveyTypes.MEAL_SURVEY;
     let res = await exec();
     expect(res.statusCode).toBe(422);
 

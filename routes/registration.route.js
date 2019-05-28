@@ -7,9 +7,6 @@ const { User } = require('./../models');
 
 router['post']('/', async (req, res) => {
   const payload = req.body;
-  // payload.email = payload.email.trim().toLowerCase();
-  // payload.password = payload.password.trim();
-  // payload.name = payload.name.trim();
 
   const errors = validatePassword(payload.password);
   if (errors.length) return res.status(422).json({ errors });

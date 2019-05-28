@@ -9,11 +9,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      surveyable: {
-        type: Sequelize.STRING
-      },
-      surveyable_id: {
-        type: Sequelize.INTEGER
+      survey_id: {
+        type: Sequelize.INTEGER,
+        references: { model: 'surveys', key: 'id' }
       },
       address: {
         type: Sequelize.STRING,

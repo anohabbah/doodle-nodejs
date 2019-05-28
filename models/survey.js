@@ -4,49 +4,28 @@ module.exports = (sequelize, DataTypes) => {
   const Survey = sequelize.define(
     'Survey',
     {
-      surveyable: DataTypes.STRING,
-      surveyableId: DataTypes.INTEGER
+      link: {
+        type: DataTypes.STRING,
+        unique: true
+      }
     },
     {
-      timestamps: false,
-      getterMethods: {
-        getItem(options) {
-          return this[
-            'get' +
-              this.get('surveyable')[0].toUpperCase() +
-              this.get('surveyable').slice(1)
-          ](options);
+      hooks: {
+        async afterCreate(instance, options) {
+          await instance.update({ link: '/surveys/' + instance.id });
         }
       }
     }
   );
 
-  Survey.associate = function(models) {
-    Survey.belongsTo(models['Meeting'], { as: 'meeting' });
+  Survey.associate = function({ Meeting, SurveyType, Date, Location, Meal }) {
+    Survey.belongsTo(Meeting, { as: 'meeting' });
 
-    Survey.belongsTo(models['DateSurvey'], {
-      foreignKey: 'surveyableId',
-      constraints: false,
-      as: 'dateSurvey'
-    });
+    Survey.belongsTo(SurveyType, { as: 'type', foreignKey: 'typeId' });
 
-    Survey.belongsTo(models['LocationAndDateSurvey'], {
-      foreignKey: 'surveyableId',
-      constraints: false,
-      as: 'locationAndDateSurvey'
-    });
-
-    Survey.belongsTo(models['LocationSurvey'], {
-      foreignKey: 'surveyableId',
-      constraints: false,
-      as: 'locationSurvey'
-    });
-
-    Survey.belongsTo(models['MealSurvey'], {
-      foreignKey: 'surveyableId',
-      constraints: false,
-      as: 'mealSurvey'
-    });
+    Survey.hasMany(Date, { as: 'dates' });
+    Survey.hasMany(Location, { as: 'locations' });
+    Survey.hasMany(Meal, { as: 'meals' });
   };
 
   return Survey;

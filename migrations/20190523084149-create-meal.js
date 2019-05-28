@@ -11,11 +11,9 @@ module.exports = {
       },
       survey_id: {
         type: Sequelize.INTEGER,
-        references: { model: 'meal_surveys', key: 'id' }
+        references: { model: 'surveys', key: 'id' }
       },
-      name: {
-        type: Sequelize.STRING
-      }
+      name: Sequelize.STRING
     });
   },
 

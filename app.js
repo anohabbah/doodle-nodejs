@@ -21,6 +21,7 @@ const meetingRouter = require('./routes/meetings.route');
 const registrationRouter = require('./routes/registration.route');
 const loginRouter = require('./routes/login.route');
 const logoutRouter = require('./routes/logout.route');
+const surveyRouter = require('./routes/surveys.route');
 const { handleCookies } = require('./middlewares/auth.middleware');
 
 const app = express();
@@ -36,6 +37,7 @@ app.use('/api/meetings', meetingRouter);
 app.use('/api/register', registrationRouter);
 app.use('/api/login', loginRouter);
 app.use('/api/logout', logoutRouter);
+app.use('/api/surveys', surveyRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

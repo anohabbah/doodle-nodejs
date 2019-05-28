@@ -5,8 +5,6 @@ module.exports = (sequelize, DataTypes) => {
   const Location = sequelize.define(
     'Location',
     {
-      locationable: DataTypes.STRING,
-      locationableId: DataTypes.INTEGER,
       address: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -24,42 +22,13 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     },
-    {
-      timestamps: false,
-      getterMethods: {
-        getItem(options) {
-          return this[
-            'get' +
-              this.get('locationable')[0].toUpperCase() +
-              this.get('locationable').slice(1)
-          ](options);
-        }
-      }
-    }
+    { timestamps: false }
   );
 
-  Location.associate = function(models) {
-    Location.belongsToMany(models['User'], {
-      as: 'voters',
-      through: 'location_voters',
-      foreignKey: 'locationId',
-      otherKey: 'voterId',
-      timestamps: false
-    });
+  Location.associate = function({ Survey, Vote }) {
+    Location.belongsTo(Survey, { as: 'survey' });
 
-    Location.belongsTo(models['DateSurvey'], {
-      foreignKey: 'locationableId',
-      constraints: false,
-      as: 'dateSurvey'
-    });
-
-    Location.belongsTo(models['LocationAndDateSurvey'], {
-      foreignKey: 'locationableId',
-      constraints: false,
-      as: 'locationAndDateSurvey'
-    });
-
-    Location.hasMany(models['Vote'], {
+    Location.hasMany(Vote, {
       foreignKey: 'voteableId',
       constraints: false,
       scope: { voteable: 'Location' }

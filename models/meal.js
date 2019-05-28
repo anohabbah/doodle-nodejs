@@ -8,8 +8,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     { timestamps: false }
   );
-  Meal.associate = function({ MealSurvey, Vote }) {
-    Meal.belongsTo(MealSurvey, { as: 'survey' });
+  Meal.associate = function({ Survey, Vote }) {
+    Meal.belongsTo(Survey, { as: 'survey' });
 
     Meal.hasMany(Vote, {
       foreignKey: 'voteableId',

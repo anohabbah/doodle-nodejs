@@ -1,123 +1,19 @@
 const router = require('express').Router();
 const Joi = require('@hapi/joi');
-const { parse } = require('./../utils/app.util');
+const { Meeting, User, SurveyType, Sequelize } = require('./../models');
 const {
-  Meeting,
-  DateSurvey,
-  MealSurvey,
-  LocationSurvey,
-  LocationAndDateSurvey,
-  Meal,
-  User,
-  sequelize,
-  Sequelize
-} = require('./../models');
+  createDateSurvey,
+  createMealSurvey,
+  createLocationSurvey,
+  createLocationAndDateSurvey
+} = require('./../utils/survey.util');
 const _ = require('lodash');
 const {
   createForbiddenError,
   createNotFoundError
 } = require('../utils/create-error.util');
 const { authMiddleware } = require('../middlewares/auth.middleware');
-const { SURVEY_TYPE } = require('../utils/constants.util');
-
-/**
- *
- * @param {string[]} dates
- * @param {number} meetingId
- * @return {Promise<Object>}
- */
-async function createDateSurvey(dates, meetingId) {
-  return await sequelize.transaction(async transaction => {
-    const survey = await DateSurvey.create({}, { transaction });
-    for (const timestamp of dates) {
-      await survey.createDate({ timestamp }, { transaction });
-    }
-
-    await survey.createSurvey({ meetingId }, { transaction });
-
-    const d = await survey.getDates({ attributes: ['id', 'timestamp'] });
-
-    return Object.assign({}, parse(survey), { dates: parse(d) });
-  });
-}
-
-/**
- *
- * @param {string[]} locations
- * @param {number} meetingId
- * @return {Promise<Object>}
- */
-async function createLocationSurvey(locations, meetingId) {
-  return await sequelize.transaction(async transaction => {
-    const survey = await LocationSurvey.create({}, { transaction });
-    for (const address of locations) {
-      await survey.createLocation({ address }, { transaction });
-    }
-
-    await survey.createSurvey({ meetingId }, { transaction });
-
-    const l = await survey.getLocations({ attributes: ['id', 'address'] });
-
-    return Object.assign({}, parse(survey), { locations: parse(l) });
-  });
-}
-
-/**
- *
- * @param {string[]} dates
- * @param {string[]} locations
- * @param {number} meetingId
- * @return {Promise<Object>}
- */
-async function createLocationAndDateSurvey(dates, locations, meetingId) {
-  return await sequelize.transaction(async transaction => {
-    const survey = await LocationAndDateSurvey.create({}, { transaction });
-
-    for (const timestamp of dates) {
-      await survey.createDate({ timestamp }, { transaction });
-    }
-
-    for (const address of locations) {
-      await survey.createLocation({ address }, { transaction });
-    }
-
-    await survey.createSurvey({ meetingId }, { transaction });
-
-    const l = await survey.getLocations({ attributes: ['id', 'address'] });
-
-    const d = await survey.getDates({ attributes: ['id', 'timestamp'] });
-
-    return Object.assign({}, parse(survey), {
-      locations: parse(l),
-      dates: parse(d)
-    });
-  });
-}
-
-/**
- *
- * @param {string[]} meals
- * @param {number} meetingId
- * @param {Object} transaction
- * @return {Promise<Object>}
- */
-async function createMealSurvey(meals, meetingId) {
-  return await sequelize.transaction(async transaction => {
-    const survey = await MealSurvey.create({}, { transaction });
-
-    const mMeals = [];
-    for (const name of meals) {
-      const meal = await Meal.create({ name }, { transaction });
-      mMeals.push(meal);
-    }
-
-    await survey.setMeals(mMeals);
-
-    await survey.createSurvey({ meetingId }, { transaction });
-
-    return await survey.reload({ include: [{ model: Meal, as: 'meals' }] });
-  });
-}
+const { surveyTypes } = require('../utils/constants.util');
 
 router['use'](authMiddleware);
 
@@ -196,7 +92,6 @@ router['delete']('/:meetingId', async (req, res) => {
 
 router['post']('/:meetingId/surveys', async (req, res) => {
   const authUserId = parseInt(req['user'], 10);
-  // const surveyType = parseInt(req.body['surveyType'], 10);
   const { meetingId } = req.params;
 
   const meeting = await Meeting.findByPk(meetingId);
@@ -210,13 +105,15 @@ router['post']('/:meetingId/surveys', async (req, res) => {
 
   // validate surveyType
   // prettier-ignore
-  const { error, value: surveyType } = Joi.validate(req.body.surveyType, Joi.number().integer().positive().min(1).max(4).required());
+  const {error, value} = Joi.validate(req.body.surveyType, Joi.number().integer().positive().min(1).max(4).required());
   if (error)
     return res.status(422).json({ message: '`surveyType` ' + error.message });
 
+  const surveyType = await SurveyType.findByPk(value);
+
   let survey;
-  switch (surveyType) {
-    case SURVEY_TYPE.DateSurvey: {
+  switch (surveyType.get('name')) {
+    case 'DateSurvey': {
       const { dates } = req.body;
 
       const { error } = Joi.validate(
@@ -230,11 +127,11 @@ router['post']('/:meetingId/surveys', async (req, res) => {
       );
       if (error) return res.status(422).json({ message: error.message });
 
-      survey = await createDateSurvey(dates, meetingId);
+      survey = await createDateSurvey(dates, meeting, surveyType);
       break;
     }
 
-    case SURVEY_TYPE.LocationSurvey: {
+    case 'LocationSurvey': {
       const { locations } = req.body;
 
       const { error } = Joi.validate(
@@ -247,11 +144,11 @@ router['post']('/:meetingId/surveys', async (req, res) => {
       );
       if (error) return res.status(422).json({ message: error.message });
 
-      survey = await createLocationSurvey(locations, meetingId);
+      survey = await createLocationSurvey(locations, meeting, surveyType);
       break;
     }
 
-    case SURVEY_TYPE.LocationAndDateSurvey: {
+    case 'LocationAndDateSurvey': {
       const { dates, locations } = req.body;
 
       const { error } = Joi.validate(
@@ -267,11 +164,16 @@ router['post']('/:meetingId/surveys', async (req, res) => {
       );
       if (error) return res.status(422).json({ message: error.message });
 
-      survey = await createLocationAndDateSurvey(dates, locations, meetingId);
+      survey = await createLocationAndDateSurvey(
+        dates,
+        locations,
+        meeting,
+        surveyType
+      );
       break;
     }
 
-    case SURVEY_TYPE.MealSurvey: {
+    case 'MealSurvey': {
       const { meals } = req.body;
 
       const { error } = Joi.validate(
@@ -283,7 +185,7 @@ router['post']('/:meetingId/surveys', async (req, res) => {
       );
       if (error) return res.status(422).json({ message: error.message });
 
-      survey = await createMealSurvey(meals, meetingId);
+      survey = await createMealSurvey(meals, meeting, surveyType);
       break;
     }
   }

@@ -9,17 +9,16 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      survey_id: {
+        type: Sequelize.INTEGER,
+        references: { model: 'surveys', key: 'id' }
+      },
       timestamp: {
         type: Sequelize.DATE
-      },
-      dateable: {
-        type: Sequelize.STRING
-      },
-      dateable_id: {
-        type: Sequelize.INTEGER
       }
     });
   },
+
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable('dates');
   }
