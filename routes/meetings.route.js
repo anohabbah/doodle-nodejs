@@ -124,7 +124,8 @@ router['post']('/:meetingId/surveys', async (req, res) => {
             .required()
         }
       );
-      if (error) return res.status(422).json({ message: error.message });
+      if (error)
+        return res.status(422).json({ message: error.details[0].message });
 
       survey = await createDateSurvey(dates, meeting, surveyType);
       break;
@@ -141,7 +142,8 @@ router['post']('/:meetingId/surveys', async (req, res) => {
             .required()
         }
       );
-      if (error) return res.status(422).json({ message: error.message });
+      if (error)
+        return res.status(422).json({ message: error.details[0].message });
 
       survey = await createLocationSurvey(locations, meeting, surveyType);
       break;
@@ -161,7 +163,8 @@ router['post']('/:meetingId/surveys', async (req, res) => {
             .required()
         }
       );
-      if (error) return res.status(422).json({ message: error.message });
+      if (error)
+        return res.status(422).json({ message: error.details[0].message });
 
       survey = await createLocationAndDateSurvey(
         dates,
@@ -182,7 +185,8 @@ router['post']('/:meetingId/surveys', async (req, res) => {
           meals: Joi.array().items(Joi.string().required()).required()
         }
       );
-      if (error) return res.status(422).json({ message: error.message });
+      if (error)
+        return res.status(422).json({ message: error.details[0].message });
 
       survey = await createMealSurvey(meals, meeting, surveyType);
       break;

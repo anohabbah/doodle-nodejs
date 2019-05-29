@@ -12,8 +12,6 @@ const {
   SurveyType
 } = require('./../../models');
 
-// TODO: a meeting can not have 2 surveys with the same type
-
 describe('Surveys', () => {
   let meeting;
   let sessionTokenString;
@@ -89,21 +87,34 @@ describe('Surveys', () => {
     expect(res.statusCode).toBe(422);
   });
 
-  it('should require dates when creating a Date survey', async () => {
+  it('should require attribute "dates" when creating a Date survey', async () => {
     delete body.dates;
 
     const res = await exec();
 
     expect(res.statusCode).toBe(422);
+    expect(res.body.message).toMatch(/dates/);
+    expect(res.body.message).toMatch(/required/);
   });
 
-  it('should require array value for `dates` when creating a Date survey', async () => {
+  it('should require array value for attribute `dates` when creating a Date survey', async () => {
     let res = await exec();
     expect(res.statusCode).toBe(200);
 
     body.dates = '';
     res = await exec();
     expect(res.statusCode).toBe(422);
+    expect(res.body.message).toMatch(/dates/);
+    expect(res.body.message).toMatch(/array/);
+  });
+
+  it('should require date values for attribute "dates"', async () => {
+    body.dates = ['2019-06-03 11:43:00', '2019-06-03', '2019-06-03', 'st'];
+
+    const res = await exec();
+
+    expect(res.statusCode).toBe(422);
+    expect(res.body.message).toMatch(/date string/);
   });
 
   it('should create a Location survey', async () => {
