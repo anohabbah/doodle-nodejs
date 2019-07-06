@@ -5,7 +5,7 @@ const PasswordValidator = require('password-validator');
 
 const RSA_PRIVATE_KEY = fs.readFileSync(__dirname + './../config/private.key');
 const RSA_PUBLIC_KEY = fs.readFileSync(__dirname + './../config/public.key');
-const SESSION_DURATION = 240;
+const SESSION_DURATION = '1h';
 
 const signJWT = util.promisify(jwt.sign);
 
@@ -13,6 +13,7 @@ const signJWT = util.promisify(jwt.sign);
 const schema = new PasswordValidator();
 
 // Add properties to it
+// prettier-ignore
 schema
   .is().min(6) // Minimum length 6
   .has().uppercase() // Must have uppercase letters

@@ -28,5 +28,8 @@ exports.handleCookies = (req, res, next) => {
 
   handleSessionCookie(cookie, req)
     .then(() => next())
-    .catch(next);
+    .catch(err => {
+      console.log(err);
+      next();
+    });
 };

@@ -3,24 +3,15 @@ const router = require('express').Router();
 const argon2 = require('argon2');
 const { validatePassword } = require('../utils/security.util');
 const { createSessionToken } = require('./../utils/security.util');
-const { User } = require('./../models');
-
-router['post']('/', async (req, res) => {
-  const payload = req.body;
-
-  const errors = validatePassword(payload.password);
-  if (errors.length) return res.status(422).json({ errors });
-
-  await createUserAndSession(res, payload);
-});
 
 /**
  *
+ * @param {Model} User
  * @param {{status, json, sendStatus}} res
  * @param {{email, password}} payload
  * @return {Promise<void>}
  */
-async function createUserAndSession(res, payload) {
+async function createUserAndSession(User, res, payload) {
   const passwordDigest = await argon2.hash(payload.password);
 
   payload = Object.assign({}, payload, { password: passwordDigest });
@@ -42,4 +33,15 @@ async function createUserAndSession(res, payload) {
     });
 }
 
-module.exports = router;
+module.exports = ({ User }) => {
+  router['post']('/', async (req, res) => {
+    const payload = req.body;
+
+    const errors = validatePassword(payload.password);
+    if (errors.length) return res.status(422).json({ errors });
+
+    await createUserAndSession(User, res, payload);
+  });
+
+  return router;
+};

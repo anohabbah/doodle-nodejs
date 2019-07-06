@@ -6,6 +6,9 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const { exceptions, transports, format } = require('winston');
 
+// Initialize db
+const db = require(__dirname + '/models');
+
 const transport =
   process.env.NODE_ENV !== 'production'
     ? new transports.Console({ format: format['prettyPrint']() })
@@ -17,11 +20,12 @@ process.on('unhandledRejection', ex => {
 
 const errorMiddleware = require('./middlewares/error.middleware');
 
-const meetingRouter = require('./routes/meetings.route');
-const registrationRouter = require('./routes/registration.route');
-const loginRouter = require('./routes/login.route');
+const meetingRouter = require('./routes/meetings.route')(db);
+const registrationRouter = require('./routes/registration.route')(db);
+const loginRouter = require('./routes/login.route')(db);
 const logoutRouter = require('./routes/logout.route');
-const surveyRouter = require('./routes/surveys.route');
+const surveyRouter = require('./routes/surveys.route')(db);
+const userRouter = require('./routes/user.route')(db);
 const { handleCookies } = require('./middlewares/auth.middleware');
 
 const app = express();
@@ -38,6 +42,7 @@ app.use('/api/register', registrationRouter);
 app.use('/api/login', loginRouter);
 app.use('/api/logout', logoutRouter);
 app.use('/api/surveys', surveyRouter);
+app.use('/api/user', userRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

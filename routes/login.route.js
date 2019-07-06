@@ -6,7 +6,6 @@ const {
 } = require('../utils/create-error.util');
 
 const { createSessionToken } = require('../utils/security.util');
-const { User } = require('./../models');
 
 /**
  *
@@ -17,7 +16,7 @@ const { User } = require('./../models');
  */
 async function loginAndBuildResponse(credentials, user, res) {
   try {
-    const sessionToken = await attemptLogin(credentials, user, res);
+    const sessionToken = await attemptLogin(credentials, user);
 
     res.cookie('SESSIONID', sessionToken, { httpOnly: true, secure: true });
 
@@ -31,10 +30,9 @@ async function loginAndBuildResponse(credentials, user, res) {
  *
  * @param {{email, password}} credentials
  * @param {{email, password}} user
- * @param {{status}} res
  * @return {Promise<void>}
  */
-async function attemptLogin(credentials, user, res) {
+async function attemptLogin(credentials, user) {
   const verified = await argon2.verify(user.password, credentials.password);
 
   if (!verified)
@@ -43,15 +41,17 @@ async function attemptLogin(credentials, user, res) {
   return await createSessionToken(user);
 }
 
-router['post']('/', async (req, res) => {
-  const credentials = req.body;
+module.exports = ({ User }) => {
+  router['post']('/', async (req, res) => {
+    const credentials = req.body;
 
-  const user = await User.findOne({
-    where: { email: credentials.email.trim().toLowerCase() }
+    const user = await User.findOne({
+      where: { email: credentials.email.trim().toLowerCase() }
+    });
+    if (!user) return res.status(422).json('Email or Password invalid.');
+
+    await loginAndBuildResponse(credentials, user, res);
   });
-  if (!user) return res.status(422).json('Email or Password invalid.');
 
-  await loginAndBuildResponse(credentials, user, res);
-});
-
-module.exports = router;
+  return router;
+};

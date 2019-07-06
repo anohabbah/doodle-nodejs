@@ -1,5 +1,4 @@
-require('dotenv').config({ debug: true });
-console.log(process.env);
+require('dotenv').config();
 
 const app = require('./app');
 
